@@ -127,7 +127,7 @@ public enum Provider: Sendable, Hashable, Codable {
         case .groq: "https://api.groq.com/openai/v1"
         case .mistral: "https://api.mistral.ai/v1"
         case .google: "https://generativelanguage.googleapis.com/v1beta"
-        case .wecode: "https://api.wecode.ai/v1"
+        case .wecode: "https://api.wecode.zone/openai"
         case .ollama: "http://localhost:11434"
         case .lmstudio: "http://localhost:1234/v1"
         case .azureOpenAI: nil // Requires resource or endpoint
