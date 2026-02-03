@@ -297,7 +297,7 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
 
         public var modelId: String {
             switch self {
-            case .wecode: "wecode"
+            case .wecode: "gpt-5.2"
             case let .custom(id): id
             }
         }

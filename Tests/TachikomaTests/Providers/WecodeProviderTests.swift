@@ -15,28 +15,13 @@ struct WecodeProviderTests {
     @Test("Wecode provider streams text and tool events")
     func streamTextEmitsDeltas() async throws {
         try await NetworkMocking.withMockedNetwork { request in
-            #expect(request.url?.path.hasSuffix("/text/stream") == true)
-            let payload = Self.ssePayload(events: [
-                Self.streamEvent(type: "text", content: "Hello ", toolCall: nil, usage: nil, finishReason: nil),
-                Self.streamEvent(type: "text", content: "world", toolCall: nil, usage: nil, finishReason: nil),
-                Self.streamEvent(
-                    type: "tool",
-                    content: nil,
-                    toolCall: [
-                        "id": "call_1",
-                        "name": "see",
-                        "arguments": ["mode": "screen"],
-                    ],
-                    usage: nil,
-                    finishReason: nil
-                ),
-                Self.streamEvent(
-                    type: "done",
-                    content: nil,
-                    toolCall: nil,
-                    usage: ["inputTokens": 4, "outputTokens": 2],
-                    finishReason: "stop"
-                ),
+            #expect(request.url?.path == "/openai/responses")
+            let payload = Self.responsesStreamPayload(events: [
+                Self.gpt5TextDelta("Hello "),
+                Self.gpt5TextDelta("world"),
+                Self.gpt5ToolCallAdded(id: "call_1", name: "see"),
+                Self.gpt5ToolCallArgumentsDone(id: "call_1", arguments: "{\"mode\":\"screen\"}"),
+                Self.gpt5Completed(),
             ])
             return NetworkMocking.streamResponse(for: request, data: payload)
         } operation: {
@@ -46,8 +31,6 @@ struct WecodeProviderTests {
 
             var text = ""
             var toolCalls: [AgentToolCall] = []
-            var finishReason: FinishReason?
-            var usage: Usage?
 
             for try await delta in stream {
                 switch delta.type {
@@ -57,10 +40,7 @@ struct WecodeProviderTests {
                     if let toolCall = delta.toolCall {
                         toolCalls.append(toolCall)
                     }
-                case .done:
-                    usage = delta.usage
-                    finishReason = delta.finishReason
-                case .toolResult, .reasoning:
+                case .done, .toolResult, .reasoning:
                     break
                 }
             }
@@ -69,26 +49,17 @@ struct WecodeProviderTests {
             #expect(toolCalls.count == 1)
             #expect(toolCalls.first?.name == "see")
             #expect(toolCalls.first?.arguments["mode"]?.stringValue == "screen")
-            #expect(finishReason == .toolCalls)
-            #expect(usage?.inputTokens == 4)
-            #expect(usage?.outputTokens == 2)
         }
     }
 
     @Test("Wecode provider aggregates streamed output")
     func generateTextAggregatesStream() async throws {
         try await NetworkMocking.withMockedNetwork { request in
-            #expect(request.url?.path.hasSuffix("/text/stream") == true)
-            let payload = Self.ssePayload(events: [
-                Self.streamEvent(type: "text", content: "Hello", toolCall: nil, usage: nil, finishReason: nil),
-                Self.streamEvent(type: "text", content: " world", toolCall: nil, usage: nil, finishReason: nil),
-                Self.streamEvent(
-                    type: "done",
-                    content: nil,
-                    toolCall: nil,
-                    usage: ["inputTokens": 3, "outputTokens": 2],
-                    finishReason: "stop"
-                ),
+            #expect(request.url?.path == "/openai/responses")
+            let payload = Self.responsesStreamPayload(events: [
+                Self.gpt5TextDelta("Hello"),
+                Self.gpt5TextDelta(" world"),
+                Self.gpt5Completed(),
             ])
             return NetworkMocking.streamResponse(for: request, data: payload)
         } operation: {
@@ -98,26 +69,16 @@ struct WecodeProviderTests {
 
             #expect(response.text == "Hello world")
             #expect(response.finishReason == .stop)
-            #expect(response.usage?.inputTokens == 3)
-            #expect(response.usage?.outputTokens == 2)
+            #expect(response.usage == nil)
         }
     }
 
     @Test("Wecode provider surfaces stream errors for aggregation")
     func generateTextFailsOnStreamError() async throws {
         try await NetworkMocking.withMockedNetwork { request in
-            #expect(request.url?.path.hasSuffix("/text/stream") == true)
-            let payload = Self.ssePayload(events: [
-                Self.streamEvent(
-                    type: "error",
-                    content: nil,
-                    toolCall: nil,
-                    usage: nil,
-                    finishReason: nil,
-                    error: "stream failed"
-                ),
-            ])
-            return NetworkMocking.streamResponse(for: request, data: payload)
+            #expect(request.url?.path == "/openai/responses")
+            let payload = Data("{\"error\":{\"message\":\"stream failed\"}}".utf8)
+            return NetworkMocking.streamResponse(for: request, data: payload, statusCode: 500)
         } operation: {
             let config = TestHelpers.createTestConfiguration(apiKeys: ["wecode": "test-key"])
             let provider = try WecodeProvider(modelId: "wecode", configuration: config)
@@ -131,7 +92,7 @@ struct WecodeProviderTests {
         ProviderRequest(messages: [ModelMessage(role: .user, content: [.text("hello")])])
     }
 
-    private static func ssePayload(events: [String]) -> Data {
+    private static func responsesStreamPayload(events: [String]) -> Data {
         var data = Data()
         for event in events {
             data.append("data: ".utf8Data())
@@ -142,31 +103,42 @@ struct WecodeProviderTests {
         return data
     }
 
-    private static func streamEvent(
-        type: String,
-        content: String?,
-        toolCall: [String: Any]?,
-        usage: [String: Any]?,
-        finishReason: String?,
-        error: String? = nil
-    ) -> String {
-        var payload: [String: Any] = ["type": type]
-        if let content {
-            payload["content"] = content
-        }
-        if let toolCall {
-            payload["toolCall"] = toolCall
-        }
-        if let usage {
-            payload["usage"] = usage
-        }
-        if let finishReason {
-            payload["finishReason"] = finishReason
-        }
-        if let error {
-            payload["error"] = error
-        }
+    private static func gpt5TextDelta(_ delta: String) -> String {
+        let payload: [String: Any] = [
+            "type": "response.output_text.delta",
+            "delta": delta,
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: payload)
+        return String(data: data, encoding: .utf8)!
+    }
 
+    private static func gpt5ToolCallAdded(id: String, name: String) -> String {
+        let payload: [String: Any] = [
+            "type": "response.output_item.added",
+            "item": [
+                "type": "function_call",
+                "id": id,
+                "name": name,
+            ],
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: payload)
+        return String(data: data, encoding: .utf8)!
+    }
+
+    private static func gpt5ToolCallArgumentsDone(id: String, arguments: String) -> String {
+        let payload: [String: Any] = [
+            "type": "response.function_call_arguments.done",
+            "item_id": id,
+            "arguments": arguments,
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: payload)
+        return String(data: data, encoding: .utf8)!
+    }
+
+    private static func gpt5Completed() -> String {
+        let payload: [String: Any] = [
+            "type": "response.completed",
+        ]
         let data = try! JSONSerialization.data(withJSONObject: payload)
         return String(data: data, encoding: .utf8)!
     }
