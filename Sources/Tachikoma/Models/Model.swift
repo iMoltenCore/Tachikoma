@@ -9,6 +9,7 @@ import Foundation
 public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
     // Provider-specific models
     case openai(OpenAI)
+    case wecode(Wecode)
     case anthropic(Anthropic)
     case google(Google)
     case mistral(Mistral)
@@ -174,6 +175,57 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
             case .gpt4Turbo: 128_000
             case .gpt35Turbo: 16000
             case .custom: 128_000 // Default assumption
+            }
+        }
+    }
+    
+    public enum Wecode: Sendable, Hashable, CaseIterable {
+        case gpt52
+
+        public static var allCases: [OpenAI] {
+            [
+                .gpt52,
+            ]
+        }
+        
+        public var openai: OpenAI {
+            switch self {
+            case .gpt52: .gpt52
+            }
+        }
+
+        public var modelId: String {
+            self.openai.modelId
+        }
+
+        public var supportsVision: Bool {
+            self.openai.supportsVision
+        }
+
+        public var supportsTools: Bool {
+            self.openai.supportsTools
+        }
+
+        public var supportsAudioInput: Bool {
+            self.openai.supportsAudioInput
+        }
+
+        public var supportsAudioOutput: Bool {
+            self.openai.supportsAudioOutput
+        }
+
+        public var supportsRealtime: Bool {
+            self.openai.supportsRealtime
+        }
+
+        public var contextLength: Int {
+            self.openai.contextLength
+        }
+        
+        public static func fromOpenAI(m: OpenAI) -> Self? {
+            switch m {
+            case .gpt52: .gpt52
+            default: nil
             }
         }
     }
@@ -700,6 +752,8 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
         switch self {
         case let .openai(model):
             return "OpenAI/\(model.modelId)"
+        case let .wecode(model):
+            return "WeCode/\(model.modelId)"
         case let .anthropic(model):
             return "Anthropic/\(model.modelId)"
         case let .google(model):
@@ -737,6 +791,8 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
         switch self {
         case let .openai(model):
             model.modelId
+        case let .wecode(model):
+            model.modelId
         case let .anthropic(model):
             model.modelId
         case let .google(model):
@@ -772,6 +828,8 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
         switch self {
         case let .openai(model):
             model.supportsVision
+        case let .wecode(model):
+            model.supportsVision
         case let .anthropic(model):
             model.supportsVision
         case let .google(model):
@@ -806,6 +864,8 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
         switch self {
         case .openai:
             "OpenAI"
+        case .wecode:
+            "WeCode"
         case .anthropic:
             "Anthropic"
         case .google:
@@ -862,6 +922,8 @@ extension LanguageModel {
         switch self {
         case let .openai(model):
             model.supportsAudioInput
+        case let .wecode(model):
+            model.supportsAudioInput
         case let .anthropic(model):
             model.supportsAudioInput
         case let .google(model):
@@ -890,6 +952,8 @@ extension LanguageModel {
     public var supportsAudioOutput: Bool {
         switch self {
         case let .openai(model):
+            model.supportsAudioOutput
+        case let .wecode(model):
             model.supportsAudioOutput
         case let .anthropic(model):
             model.supportsAudioOutput
@@ -920,6 +984,8 @@ extension LanguageModel {
         switch self {
         case let .openai(model):
             model.supportsTools
+        case let .wecode(model):
+            model.supportsTools
         case let .anthropic(model):
             model.supportsTools
         case let .google(model):
@@ -948,6 +1014,8 @@ extension LanguageModel {
     public var contextLength: Int {
         switch self {
         case let .openai(model):
+            model.contextLength
+        case let .wecode(model):
             model.contextLength
         case let .anthropic(model):
             model.contextLength
@@ -982,6 +1050,9 @@ extension LanguageModel {
         switch self {
         case let .openai(model):
             hasher.combine("openai")
+            hasher.combine(model)
+        case let .wecode(model):
+            hasher.combine("wecode")
             hasher.combine(model)
         case let .anthropic(model):
             hasher.combine("anthropic")
@@ -1104,7 +1175,14 @@ extension LanguageModel {
         let dashed = normalized.replacingOccurrences(of: "_", with: "-")
         let compact = dashed.replacingOccurrences(of: "-", with: "")
         let dotted = dashed.replacingOccurrences(of: ".", with: "-")
-
+        
+        // MARK: Wecode models
+        let wecodePrefix = "wecode-"
+        
+        if dashed == "\(wecodePrefix)gpt-5.2" {
+            return .wecode(.gpt52)
+        }
+        
         // MARK: OpenAI models
 
         if dashed == "gpt-5-pro" || compact == "gpt5pro" {

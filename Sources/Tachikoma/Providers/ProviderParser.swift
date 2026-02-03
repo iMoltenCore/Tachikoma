@@ -93,6 +93,7 @@ public enum ProviderParser {
     ///   - providersString: The AI_PROVIDERS string (e.g., from TACHIKOMA_AI_PROVIDERS env var)
     ///   - hasOpenAI: Whether OpenAI API key is available
     ///   - hasAnthropic: Whether Anthropic API key is available
+    ///   - hasWecode: Whether Wecode API key is available
     ///   - hasGrok: Whether Grok API key is available
     ///   - hasOllama: Whether Ollama is available (always true as it doesn't require API key)
     ///   - configuredDefault: Optional default from configuration
@@ -102,6 +103,7 @@ public enum ProviderParser {
         from providersString: String,
         hasOpenAI: Bool,
         hasAnthropic: Bool,
+        hasWecode: Bool = false,
         hasGrok: Bool = false,
         hasOllama: Bool = true,
         configuredDefault: LanguageModel? = nil,
@@ -119,6 +121,8 @@ public enum ProviderParser {
                 environmentModel = self.parseOpenAIModel(config.model)
             case "anthropic" where hasAnthropic:
                 environmentModel = self.parseAnthropicModel(config.model)
+            case "wecode" where hasWecode:
+                environmentModel = self.parseWecodeModel(config.model)
             case "google", "gemini":
                 environmentModel = self.parseGoogleModel(config.model)
             case "grok" where hasGrok, "xai" where hasGrok:
@@ -150,6 +154,7 @@ public enum ProviderParser {
             self.getDefaultFallbackModel(
                 hasOpenAI: hasOpenAI,
                 hasAnthropic: hasAnthropic,
+                hasWecode: hasWecode,
                 hasGrok: hasGrok,
                 hasOllama: hasOllama,
             )
@@ -168,6 +173,7 @@ public enum ProviderParser {
         from providersString: String,
         hasOpenAI: Bool,
         hasAnthropic: Bool,
+        hasWecode: Bool = false,
         hasGrok: Bool = false,
         hasOllama: Bool = true,
         configuredDefault: LanguageModel? = nil,
@@ -179,6 +185,7 @@ public enum ProviderParser {
             from: providersString,
             hasOpenAI: hasOpenAI,
             hasAnthropic: hasAnthropic,
+            hasWecode: hasWecode,
             hasGrok: hasGrok,
             hasOllama: hasOllama,
             configuredDefault: configuredDefault,
@@ -231,6 +238,13 @@ public enum ProviderParser {
         default:
             // Handle custom/fine-tuned models
             .openai(.custom(modelString))
+        }
+    }
+    
+    private static func parseWecodeModel(_ modelString: String) -> LanguageModel? {
+        switch parseOpenAIModel(modelString) {
+        case .openai(.gpt52): .wecode(.gpt52)
+        default: nil
         }
     }
 
@@ -309,6 +323,7 @@ public enum ProviderParser {
     private static func getDefaultFallbackModel(
         hasOpenAI: Bool,
         hasAnthropic: Bool,
+        hasWecode: Bool,
         hasGrok: Bool,
         hasOllama _: Bool,
     )
@@ -316,6 +331,8 @@ public enum ProviderParser {
     {
         if hasAnthropic {
             .anthropic(.opus4)
+        } else if hasWecode {
+            .wecode(.gpt52)
         } else if hasOpenAI {
             .openai(.gpt5Mini)
         } else if hasGrok {

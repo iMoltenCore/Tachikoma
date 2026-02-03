@@ -33,6 +33,9 @@ public struct ProviderFactory {
                 return try OpenAIProvider(model: openaiModel, configuration: configuration)
             }
 
+        case let .wecode(model):
+            return try WecodeProvider(model: model, configuration: configuration)
+            
         case let .anthropic(anthropicModel):
             return try AnthropicProvider(model: anthropicModel, configuration: configuration)
 
