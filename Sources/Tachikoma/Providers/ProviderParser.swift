@@ -103,6 +103,7 @@ public enum ProviderParser {
         hasOpenAI: Bool,
         hasAnthropic: Bool,
         hasGrok: Bool = false,
+        hasWecode: Bool = false,
         hasOllama: Bool = true,
         configuredDefault: LanguageModel? = nil,
         isEnvironmentProvided: Bool = false,
@@ -123,6 +124,8 @@ public enum ProviderParser {
                 environmentModel = self.parseGoogleModel(config.model)
             case "grok" where hasGrok, "xai" where hasGrok:
                 environmentModel = self.parseGrokModel(config.model)
+            case "wecode" where hasWecode:
+                environmentModel = self.parseWecodeModel(config.model)
             case "ollama" where hasOllama:
                 environmentModel = self.parseOllamaModel(config.model)
             default:
@@ -151,6 +154,7 @@ public enum ProviderParser {
                 hasOpenAI: hasOpenAI,
                 hasAnthropic: hasAnthropic,
                 hasGrok: hasGrok,
+                hasWecode: hasWecode,
                 hasOllama: hasOllama,
             )
         }
@@ -169,6 +173,7 @@ public enum ProviderParser {
         hasOpenAI: Bool,
         hasAnthropic: Bool,
         hasGrok: Bool = false,
+        hasWecode: Bool = false,
         hasOllama: Bool = true,
         configuredDefault: LanguageModel? = nil,
     )
@@ -180,6 +185,7 @@ public enum ProviderParser {
             hasOpenAI: hasOpenAI,
             hasAnthropic: hasAnthropic,
             hasGrok: hasGrok,
+            hasWecode: hasWecode,
             hasOllama: hasOllama,
             configuredDefault: configuredDefault,
             isEnvironmentProvided: false,
@@ -285,6 +291,15 @@ public enum ProviderParser {
         }
     }
 
+    private static func parseWecodeModel(_ modelString: String) -> LanguageModel? {
+        let trimmed = modelString.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return nil }
+        if trimmed.lowercased() == "wecode" {
+            return .wecode(.wecode)
+        }
+        return .wecode(.custom(trimmed))
+    }
+
     private static func parseOllamaModel(_ modelString: String) -> LanguageModel? {
         switch modelString.lowercased() {
         // GPT-OSS models
@@ -310,6 +325,7 @@ public enum ProviderParser {
         hasOpenAI: Bool,
         hasAnthropic: Bool,
         hasGrok: Bool,
+        hasWecode: Bool,
         hasOllama _: Bool,
     )
         -> LanguageModel
@@ -318,6 +334,8 @@ public enum ProviderParser {
             .anthropic(.opus4)
         } else if hasOpenAI {
             .openai(.gpt5Mini)
+        } else if hasWecode {
+            .wecode(.wecode)
         } else if hasGrok {
             .grok(.grok4FastReasoning)
         } else {

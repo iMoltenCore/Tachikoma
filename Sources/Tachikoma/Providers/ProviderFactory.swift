@@ -39,6 +39,9 @@ public struct ProviderFactory {
         case let .google(googleModel):
             return try GoogleProvider(model: googleModel, configuration: configuration)
 
+        case let .wecode(wecodeModel):
+            return try WecodeProvider(modelId: wecodeModel.modelId, configuration: configuration)
+
         case let .mistral(mistralModel):
             return try MistralProvider(model: mistralModel, configuration: configuration)
 

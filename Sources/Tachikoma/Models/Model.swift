@@ -11,6 +11,7 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
     case openai(OpenAI)
     case anthropic(Anthropic)
     case google(Google)
+    case wecode(Wecode)
     case mistral(Mistral)
     case groq(Groq)
     case grok(Grok)
@@ -283,6 +284,31 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
             case .gemini25FlashLite:
                 524_288
             }
+        }
+    }
+
+    public enum Wecode: Sendable, Hashable, CaseIterable {
+        case wecode
+        case custom(String)
+
+        public static var allCases: [Wecode] {
+            [.wecode]
+        }
+
+        public var modelId: String {
+            switch self {
+            case .wecode: "wecode"
+            case let .custom(id): id
+            }
+        }
+
+        public var supportsVision: Bool { false }
+        public var supportsTools: Bool { true }
+        public var supportsAudioInput: Bool { false }
+        public var supportsAudioOutput: Bool { false }
+
+        public var contextLength: Int {
+            128_000
         }
     }
 
@@ -704,6 +730,8 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
             return "Anthropic/\(model.modelId)"
         case let .google(model):
             return "Google/\(model.userFacingModelId)"
+        case let .wecode(model):
+            return "Wecode/\(model.modelId)"
         case let .mistral(model):
             return "Mistral/\(model.rawValue)"
         case let .groq(model):
@@ -741,6 +769,8 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
             model.modelId
         case let .google(model):
             model.userFacingModelId
+        case let .wecode(model):
+            model.modelId
         case let .mistral(model):
             model.rawValue
         case let .groq(model):
@@ -776,6 +806,8 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
             model.supportsVision
         case let .google(model):
             model.supportsVision
+        case let .wecode(model):
+            model.supportsVision
         case let .mistral(model):
             model.supportsVision
         case let .groq(model):
@@ -810,6 +842,8 @@ public enum LanguageModel: Sendable, CustomStringConvertible, Hashable {
             "Anthropic"
         case .google:
             "Google"
+        case .wecode:
+            "Wecode"
         case .mistral:
             "Mistral"
         case .groq:
@@ -866,6 +900,8 @@ extension LanguageModel {
             model.supportsAudioInput
         case let .google(model):
             model.supportsAudioInput
+        case let .wecode(model):
+            model.supportsAudioInput
         case let .mistral(model):
             model.supportsAudioInput
         case let .groq(model):
@@ -894,6 +930,8 @@ extension LanguageModel {
         case let .anthropic(model):
             model.supportsAudioOutput
         case let .google(model):
+            model.supportsAudioOutput
+        case let .wecode(model):
             model.supportsAudioOutput
         case let .mistral(model):
             model.supportsAudioOutput
@@ -924,6 +962,8 @@ extension LanguageModel {
             model.supportsTools
         case let .google(model):
             model.supportsTools
+        case let .wecode(model):
+            model.supportsTools
         case let .mistral(model):
             model.supportsTools
         case let .groq(model):
@@ -952,6 +992,8 @@ extension LanguageModel {
         case let .anthropic(model):
             model.contextLength
         case let .google(model):
+            model.contextLength
+        case let .wecode(model):
             model.contextLength
         case let .mistral(model):
             model.contextLength
@@ -988,6 +1030,9 @@ extension LanguageModel {
             hasher.combine(model)
         case let .google(model):
             hasher.combine("google")
+            hasher.combine(model)
+        case let .wecode(model):
+            hasher.combine("wecode")
             hasher.combine(model)
         case let .mistral(model):
             hasher.combine("mistral")
@@ -1041,6 +1086,8 @@ extension LanguageModel {
         case let (.anthropic(lhsModel), .anthropic(rhsModel)):
             lhsModel == rhsModel
         case let (.google(lhsModel), .google(rhsModel)):
+            lhsModel == rhsModel
+        case let (.wecode(lhsModel), .wecode(rhsModel)):
             lhsModel == rhsModel
         case let (.mistral(lhsModel), .mistral(rhsModel)):
             lhsModel == rhsModel
@@ -1275,6 +1322,15 @@ extension LanguageModel {
 
         if canonicalForms.contains(where: { genericGeminiIdentifiers.contains($0) }) {
             return .google(.gemini3Flash)
+        }
+
+        // MARK: Wecode models
+
+        if normalized == "wecode" || dashed.hasPrefix("wecode-") || normalized.hasPrefix("wecode:") {
+            if normalized == "wecode" {
+                return .wecode(.wecode)
+            }
+            return .wecode(.custom(trimmed))
         }
 
         // MARK: Grok models

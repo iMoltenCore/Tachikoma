@@ -196,6 +196,8 @@ public final class ModelCapabilityRegistry: @unchecked Sendable {
             "anthropic:\(submodel.modelId)"
         case let .google(submodel):
             "google:\(submodel.rawValue)"
+        case let .wecode(submodel):
+            "wecode:\(submodel.modelId)"
         case let .mistral(submodel):
             "mistral:\(submodel.rawValue)"
         case let .groq(submodel):
