@@ -556,6 +556,7 @@ public struct ModelCostCalculator: Sendable {
             case .gemini25FlashLite: (0.10, 0.40)
             }
         // Other providers - estimates
+        case .wecode: (2.00, 6.00)
         case .mistral: (2.00, 6.00)
         case .groq: (0.27, 0.27) // Groq has very low pricing
         case .grok: (2.00, 8.00)

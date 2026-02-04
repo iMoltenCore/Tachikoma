@@ -97,6 +97,7 @@ enum TestHelpers {
                 "X_AI_API_KEY",
                 "GROK_API_KEY",
                 "GEMINI_API_KEY",
+                "WECODE_API_KEY",
             ]
             let saved = envKeys.map { key in (key, getenv(key).flatMap { String(cString: $0) }) }
             envKeys.forEach { unsetenv($0) }
@@ -172,6 +173,7 @@ enum TestHelpers {
             "groq": self.resolve(provider: "groq", provided: "test-key"),
             "mistral": self.resolve(provider: "mistral", provided: "test-key"),
             "google": self.resolve(provider: "google", provided: "test-key"),
+            "wecode": self.resolve(provider: "wecode", provided: "test-key"),
         ]
     }
 
@@ -209,6 +211,8 @@ enum TestHelpers {
             ["MISTRAL_API_KEY"]
         case "google":
             ["GEMINI_API_KEY", "GOOGLE_API_KEY", "GOOGLE_APPLICATION_CREDENTIALS"]
+        case "wecode":
+            ["WECODE_API_KEY"]
         default:
             []
         }

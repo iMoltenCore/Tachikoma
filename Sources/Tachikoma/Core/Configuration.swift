@@ -294,6 +294,7 @@ public final class TachikomaConfiguration: @unchecked Sendable {
         let urlMappings: [Provider: String] = [
             .openai: "OPENAI_BASE_URL",
             .anthropic: "ANTHROPIC_BASE_URL",
+            .wecode: "WECODE_BASE_URL",
             .ollama: "OLLAMA_BASE_URL",
             .azureOpenAI: "AZURE_OPENAI_ENDPOINT",
         ]
@@ -362,6 +363,8 @@ public final class TachikomaConfiguration: @unchecked Sendable {
                     self.setAPIKey(value, for: .openai)
                 } else if lowercaseKey.contains("anthropic") || lowercaseKey.contains("claude") {
                     self.setAPIKey(value, for: .anthropic)
+                } else if lowercaseKey.contains("wecode") {
+                    self.setAPIKey(value, for: .wecode)
                 } else if lowercaseKey.contains("grok") {
                     self.setAPIKey(value, for: .grok)
                 } else if lowercaseKey.contains("groq") {

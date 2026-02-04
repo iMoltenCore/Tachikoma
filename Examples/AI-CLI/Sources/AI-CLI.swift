@@ -376,6 +376,7 @@ struct AICLI {
         case .openai: .openai
         case .anthropic: .anthropic
         case .google: .google
+        case .wecode: .wecode
         case .mistral: .mistral
         case .groq: .groq
         case .grok: .grok

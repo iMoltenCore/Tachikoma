@@ -495,20 +495,22 @@ private let _isLiveSuite: Bool = {
 // MARK: - Network Mock Helper
 
 enum NetworkMocking {
-    static func withMockedNetwork<T>(
+    static func withMockedNetwork<T: Sendable>(
         handler: @Sendable @escaping (URLRequest) throws -> (HTTPURLResponse, Data),
-        operation: () async throws -> T,
+        operation: @Sendable () async throws -> T,
     ) async throws
         -> T
     {
-        let previousHandler = MockURLProtocol.handler
-        MockURLProtocol.handler = handler
-        URLProtocol.registerClass(MockURLProtocol.self)
-        defer {
-            URLProtocol.unregisterClass(MockURLProtocol.self)
-            MockURLProtocol.handler = previousHandler
+        try await TestEnvironmentMutex.shared.withLock {
+            let previousHandler = MockURLProtocol.handler
+            MockURLProtocol.handler = handler
+            URLProtocol.registerClass(MockURLProtocol.self)
+            defer {
+                URLProtocol.unregisterClass(MockURLProtocol.self)
+                MockURLProtocol.handler = previousHandler
+            }
+            return try await operation()
         }
-        return try await operation()
     }
 
     static func jsonResponse(for request: URLRequest, data: Data, statusCode: Int = 200) -> (HTTPURLResponse, Data) {

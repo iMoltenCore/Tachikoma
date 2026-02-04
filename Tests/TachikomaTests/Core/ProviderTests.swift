@@ -14,6 +14,7 @@ struct ProviderTests {
             #expect(Provider.groq.identifier == "groq")
             #expect(Provider.mistral.identifier == "mistral")
             #expect(Provider.google.identifier == "google")
+            #expect(Provider.wecode.identifier == "wecode")
             #expect(Provider.ollama.identifier == "ollama")
             #expect(Provider.azureOpenAI.identifier == "azure-openai")
         }
@@ -32,6 +33,7 @@ struct ProviderTests {
             #expect(Provider.groq.displayName == "Groq")
             #expect(Provider.mistral.displayName == "Mistral")
             #expect(Provider.google.displayName == "Google")
+            #expect(Provider.wecode.displayName == "Wecode")
             #expect(Provider.ollama.displayName == "Ollama")
             #expect(Provider.azureOpenAI.displayName == "Azure OpenAI")
             #expect(Provider.custom("test").displayName == "Test")
@@ -45,6 +47,7 @@ struct ProviderTests {
             #expect(Provider.groq.environmentVariable == "GROQ_API_KEY")
             #expect(Provider.mistral.environmentVariable == "MISTRAL_API_KEY")
             #expect(Provider.google.environmentVariable == "GEMINI_API_KEY")
+            #expect(Provider.wecode.environmentVariable == "WECODE_API_KEY")
             #expect(Provider.ollama.environmentVariable == "OLLAMA_API_KEY")
             #expect(Provider.azureOpenAI.environmentVariable == "AZURE_OPENAI_API_KEY")
             #expect(Provider.custom("test").environmentVariable.isEmpty)
@@ -73,6 +76,7 @@ struct ProviderTests {
             #expect(Provider.groq.defaultBaseURL == "https://api.groq.com/openai/v1")
             #expect(Provider.mistral.defaultBaseURL == "https://api.mistral.ai/v1")
             #expect(Provider.google.defaultBaseURL == "https://generativelanguage.googleapis.com/v1beta")
+            #expect(Provider.wecode.defaultBaseURL == "https://api.wecode.zone/openai")
             #expect(Provider.ollama.defaultBaseURL == "http://localhost:11434")
             #expect(Provider.azureOpenAI.defaultBaseURL == nil)
             #expect(Provider.custom("test").defaultBaseURL == nil)
@@ -86,6 +90,7 @@ struct ProviderTests {
             #expect(Provider.groq.requiresAPIKey == true)
             #expect(Provider.mistral.requiresAPIKey == true)
             #expect(Provider.google.requiresAPIKey == true)
+            #expect(Provider.wecode.requiresAPIKey == true)
             #expect(Provider.ollama.requiresAPIKey == false) // Ollama typically doesn't require API key
             #expect(Provider.azureOpenAI.requiresAPIKey == true)
             #expect(Provider.custom("test").requiresAPIKey == true) // Assume custom providers need keys
@@ -102,6 +107,7 @@ struct ProviderTests {
             #expect(Provider.from(identifier: "groq") == .groq)
             #expect(Provider.from(identifier: "mistral") == .mistral)
             #expect(Provider.from(identifier: "google") == .google)
+            #expect(Provider.from(identifier: "wecode") == .wecode)
             #expect(Provider.from(identifier: "ollama") == .ollama)
             #expect(Provider.from(identifier: "azure-openai") == .azureOpenAI)
         }
@@ -140,6 +146,7 @@ struct ProviderTests {
                 .groq,
                 .mistral,
                 .google,
+                .wecode,
                 .ollama,
                 .azureOpenAI,
             ]
