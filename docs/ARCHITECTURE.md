@@ -262,13 +262,6 @@ private func convertToOpenAIRequest(_ request: ModelRequest, stream: Bool) throw
 - Vision models: llava, bakllava (no tool calling)
 - Custom model endpoints
 
-### Wecode Provider
-
-**OpenAI Responses Proxy:**
-- Uses Wecode's OpenAI-compatible Responses endpoint
-- Requires `WECODE_API_KEY`
-- Always streams; non-stream callers aggregate deltas
-
 ## Provider Registry & Management
 
 ### ModelProvider (Actor)

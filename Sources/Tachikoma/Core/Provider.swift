@@ -27,9 +27,6 @@ public enum Provider: Sendable, Hashable, Codable {
     /// OpenAI provider (GPT models, DALL-E, etc.)
     case openai
 
-    /// Wecode as OpenAI proxy with some restriction.
-    case wecode
-    
     /// Anthropic provider (Claude models)
     case anthropic
 
@@ -61,7 +58,6 @@ public enum Provider: Sendable, Hashable, Codable {
     public var identifier: String {
         switch self {
         case .openai: "openai"
-        case .wecode: "wecode"
         case .anthropic: "anthropic"
         case .grok: "grok"
         case .groq: "groq"
@@ -78,7 +74,6 @@ public enum Provider: Sendable, Hashable, Codable {
     public var displayName: String {
         switch self {
         case .openai: "OpenAI"
-        case .wecode: "Wecode"
         case .anthropic: "Anthropic"
         case .grok: "Grok"
         case .groq: "Groq"
@@ -95,7 +90,6 @@ public enum Provider: Sendable, Hashable, Codable {
     public var environmentVariable: String {
         switch self {
         case .openai: "OPENAI_API_KEY"
-        case .wecode: "WECODE_API_KEY"
         case .anthropic: "ANTHROPIC_API_KEY"
         case .grok: "X_AI_API_KEY"
         case .groq: "GROQ_API_KEY"
@@ -122,7 +116,6 @@ public enum Provider: Sendable, Hashable, Codable {
     public var defaultBaseURL: String? {
         switch self {
         case .openai: "https://api.openai.com/v1"
-        case .wecode: "https://api.wecode.zone/openai"
         case .anthropic: "https://api.anthropic.com"
         case .grok: "https://api.x.ai/v1"
         case .groq: "https://api.groq.com/openai/v1"
@@ -155,7 +148,6 @@ public enum Provider: Sendable, Hashable, Codable {
         // Create provider from string identifier
         switch identifier.lowercased() {
         case "openai": .openai
-        case "wecode": .wecode
         case "anthropic": .anthropic
         case "grok", "xai": .grok
         case "groq": .groq

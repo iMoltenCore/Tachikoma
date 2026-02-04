@@ -192,8 +192,6 @@ public final class ModelCapabilityRegistry: @unchecked Sendable {
         switch model {
         case let .openai(submodel):
             "openai:\(submodel.modelId)"
-        case let .wecode(submodel):
-            "wecode:\(submodel.modelId)"
         case let .anthropic(submodel):
             "anthropic:\(submodel.modelId)"
         case let .google(submodel):

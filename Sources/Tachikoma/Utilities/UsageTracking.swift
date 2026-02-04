@@ -537,7 +537,6 @@ public struct ModelCostCalculator: Sendable {
             case .gpt35Turbo: (0.50, 1.50)
             case .custom: (2.50, 10.00) // Default estimate
             }
-        case let .wecode(wecodeModel): (0, 0)
         // Anthropic Pricing (as of 2025)
         case let .anthropic(anthropicModel):
             switch anthropicModel {
