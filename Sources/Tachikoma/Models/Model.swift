@@ -1109,8 +1109,6 @@ extension LanguageModel {
         switch (lhs, rhs) {
         case let (.openai(lhsModel), .openai(rhsModel)):
             lhsModel == rhsModel
-        case let (.wecode(lhsModel), .wecode(rhsModel)):
-            lhsModel == rhsModel
         case let (.anthropic(lhsModel), .anthropic(rhsModel)):
             lhsModel == rhsModel
         case let (.google(lhsModel), .google(rhsModel)):
