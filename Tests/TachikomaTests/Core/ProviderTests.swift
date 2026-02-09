@@ -76,7 +76,7 @@ struct ProviderTests {
             #expect(Provider.groq.defaultBaseURL == "https://api.groq.com/openai/v1")
             #expect(Provider.mistral.defaultBaseURL == "https://api.mistral.ai/v1")
             #expect(Provider.google.defaultBaseURL == "https://generativelanguage.googleapis.com/v1beta")
-            #expect(Provider.wecode.defaultBaseURL == "https://api.wecode.zone/openai")
+            #expect(Provider.wecode.defaultBaseURL == "https://api.wecodemaster.com/v1")
             #expect(Provider.ollama.defaultBaseURL == "http://localhost:11434")
             #expect(Provider.azureOpenAI.defaultBaseURL == nil)
             #expect(Provider.custom("test").defaultBaseURL == nil)
